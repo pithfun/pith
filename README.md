@@ -1,1 +1,3 @@
-# Tiny Blob
+# TinyBlob
+
+Smart contracts utilized by TinyBlob
