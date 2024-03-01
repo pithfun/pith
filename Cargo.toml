@@ -1,0 +1,17 @@
+[package]
+name = "tiny_blob"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+solana-program = "1.17.17"
+
+[dev-dependencies]
+solana-program = "=1.17.17"
+solana-sdk = "1.17.17"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+no-entrypoint = []
