@@ -1,17 +1,21 @@
 [package]
-name = "tiny_blob"
-version = "0.1.0"
+name = "pith"
+version = "0.1.3"
+description = "Pith is a decentralized prediction market"
 edition = "2021"
+keywords = ["solana", "crypto", "decentralized", "market"]
 
-[dependencies]
-solana-program = "1.17.17"
-
-[dev-dependencies]
-solana-program = "=1.17.17"
-solana-sdk = "1.17.17"
+[features]
+no-entrypoint = []
+default = []
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
-[features]
-no-entrypoint = []
+[dependencies]
+solana-program = "1.18.1"
+borsh = "1.4.0"
+num_enum = "0.7.2"
+shank = "0.4.2"
+
+[dev-dependencies]
