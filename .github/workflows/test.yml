@@ -18,8 +18,10 @@ jobs:
       - name: Install Solana CLI
         run: |
           sh -c "$(curl -sSfL https://release.solana.com/v1.18.4/install)"
-          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          echo 'export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"' >> $HOME/.bashrc
       - name: Build
-        run: cargo build-bpf
+        run: |
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          cargo build-bpf
       - name: Run tests
         run: cargo test --verbose
