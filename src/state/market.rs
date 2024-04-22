@@ -6,8 +6,8 @@ use shank::ShankAccount;
 pub struct Market {
     // The proof PDAs bump.
     pub bump: u8,
-    // The transaction ID used to keep track of the client state.
-    pub tx_id: String,
+    // Transaction ID used to keep track of client state.
+    pub id: u64,
     // A none-unique string used to identify a market.
     pub title: String,
 }

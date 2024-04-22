@@ -23,7 +23,7 @@ pub fn process_init_market<'a, 'info>(
     load_signer(signer)?;
     load_uninitialized_pda(
         market_info,
-        &[MARKET, signer.key.as_ref(), args.tx_id.as_bytes().as_ref()],
+        &[MARKET, signer.key.as_ref(), args.id.to_le_bytes().as_ref()],
         args.bump,
         &crate::id(),
     )?;
@@ -35,14 +35,13 @@ pub fn process_init_market<'a, 'info>(
         &crate::id(),
         // Calculate how much space we need.
         // 1 byte => bump
-        // 1 byte => is_initialzed
+        // 8 bytes => id
         // 4 bytes + title.len() => title
-        // 4 bytes + tx_id.len() => tx_id
-        1 + 1 + (4 + args.tx_id.len()) + (4 + args.title.len()),
+        1 + 8 + (4 + args.title.len()),
         &[
             MARKET,
             signer.key.as_ref(),
-            args.tx_id.as_bytes().as_ref(),
+            args.id.to_le_bytes().as_ref(),
             &[args.bump],
         ],
         system_program,
@@ -51,7 +50,7 @@ pub fn process_init_market<'a, 'info>(
 
     let mut market_data = try_from_slice_unchecked::<Market>(&market_info.data.borrow()).unwrap();
     market_data.bump = args.bump;
-    market_data.tx_id = args.tx_id;
+    market_data.id = args.id;
     market_data.title = args.title;
 
     market_data.serialize(&mut &mut market_info.data.borrow_mut()[..])?;

@@ -14,7 +14,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 solana-program = "1.18.1"
-borsh = "1.4.0"
+borsh = { version ="1.4.0", features = ["derive"] }
 num_enum = "0.7.2"
 shank = "0.4.2"
 
