@@ -20,6 +20,6 @@ pub enum PithInstruction {
 #[derive(Clone, Debug, BorshDeserialize)]
 pub struct CreateMarketArgs {
     pub bump: u8,
-    pub tx_id: String,
+    pub id: u64,
     pub title: String,
 }
