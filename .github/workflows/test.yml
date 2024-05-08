@@ -24,4 +24,4 @@ jobs:
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           cargo build-bpf
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test-sbf --verbose

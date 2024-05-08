@@ -2,7 +2,8 @@ use solana_program::{
     account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey, system_program,
 };
 
-// load_signer throws an error if the account is not the signer.
+/// Errors if:
+/// The account is not the signer.
 pub fn load_signer<'a, 'info>(info: &AccountInfo<'info>) -> Result<(), ProgramError> {
     if !info.is_signer {
         return Err(ProgramError::MissingRequiredSignature);
@@ -32,9 +33,9 @@ pub fn load_uninitialized_account<'a, 'info>(
     Ok(())
 }
 
-// load_uninitialized_pda will throw an error if;
-// The keys do not match
-// The bump does not match
+/// Errors if:
+/// The keys do not match
+/// The bump does not match
 pub fn load_uninitialized_pda<'a, 'info>(
     info: &'a AccountInfo<'info>,
     seeds: &[&[u8]],
