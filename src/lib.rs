@@ -33,9 +33,8 @@ pub fn process_instruction(
         .ok_or(ProgramError::InvalidInstructionData)?;
 
     match PithInstruction::try_from(*tag).or(Err(ProgramError::InvalidInstructionData))? {
-        PithInstruction::CreateMarket => process_init_market(program_id, accounts, data)?,
-        PithInstruction::DeleteMarket => process_delete_market(program_id, accounts, data)?,
-        PithInstruction::UpdateMarket => process_update_market(program_id, accounts, data)?,
+        PithInstruction::Market => process_market(program_id, accounts, data)?,
+        PithInstruction::Bid => process_bid(program_id, accounts, data)?,
     }
 
     Ok(())

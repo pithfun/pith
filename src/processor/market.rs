@@ -3,17 +3,17 @@ use solana_program::{
     program_error::ProgramError, pubkey::Pubkey, system_program,
 };
 
-use crate::{instruction::CreateMarketArgs, loaders::*, state::Market, utils::*, MARKET};
+use crate::{instruction::MarketArgs, loaders::*, state::Market, utils::*, MARKET};
 use borsh::{BorshDeserialize, BorshSerialize};
 
-// process_init_market creates a new tradable market.
-pub fn process_init_market<'a, 'info>(
+// process_market creates a new tradable market.
+pub fn process_market<'a, 'info>(
     _program_id: &Pubkey,
     accounts: &'a [AccountInfo<'info>],
     data: &[u8],
 ) -> ProgramResult {
     // Parse args
-    let args = CreateMarketArgs::try_from_slice(data)?;
+    let args = MarketArgs::try_from_slice(data)?;
 
     // Load account data
     let [signer, market_info, system_program] = accounts else {
@@ -33,11 +33,7 @@ pub fn process_init_market<'a, 'info>(
     create_pda(
         market_info,
         &crate::id(),
-        // Calculate how much space we need.
-        // 1 byte => bump
-        // 8 bytes => id
-        // 4 bytes + title.len() => title
-        1 + 8 + (4 + args.title.len()),
+        Market::get_account_size(&args.title, &Market::DISCRIMINATOR.to_string()),
         &[
             MARKET,
             signer.key.as_ref(),
@@ -49,27 +45,14 @@ pub fn process_init_market<'a, 'info>(
     )?;
 
     let mut market_data = try_from_slice_unchecked::<Market>(&market_info.data.borrow()).unwrap();
+    market_data.discriminator = Market::DISCRIMINATOR.to_string();
     market_data.bump = args.bump;
+    market_data.authority = *signer.key;
     market_data.id = args.id;
     market_data.title = args.title;
-
+    market_data.key = *market_info.key;
+    market_data.counter = 0;
     market_data.serialize(&mut &mut market_info.data.borrow_mut()[..])?;
 
     Ok(())
-}
-
-pub fn process_delete_market<'a, 'info>(
-    _program_id: &Pubkey,
-    _accounts: &'a [AccountInfo<'info>],
-    _data: &[u8],
-) -> ProgramResult {
-    todo!()
-}
-
-pub fn process_update_market<'a, 'info>(
-    _program_id: &Pubkey,
-    _accounts: &'a [AccountInfo<'info>],
-    _data: &[u8],
-) -> ProgramResult {
-    todo!()
 }

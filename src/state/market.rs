@@ -1,13 +1,33 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use shank::ShankAccount;
+use solana_program::pubkey::Pubkey;
 
-// Market is an account that tracks the current state of the market.
+/// Market is the parent account that stores a tradable asset and keeps track of
+/// the bids placed on the specific market via a counter.
+#[repr(C)]
 #[derive(Debug, Clone, BorshSerialize, BorshDeserialize, ShankAccount)]
 pub struct Market {
-    // The proof PDAs bump.
+    /// Account discriminator
+    pub discriminator: String,
+    /// The market account PDA.
     pub bump: u8,
-    // Transaction ID used to keep track of client state.
+    /// The accounts authority.
+    pub authority: Pubkey,
+    /// The unique market ID.
     pub id: u64,
-    // A none-unique string used to identify a market.
+    /// The title string for a specific market.
     pub title: String,
+    /// Counter keeps track of the number of bids placed on this market.
+    pub counter: u16,
+    /// The market account key. Useful since `getMultipleAccountsInfo` does not
+    /// return a `keyedAccountInfo`.
+    pub key: Pubkey,
+}
+
+impl Market {
+    pub const DISCRIMINATOR: &'static str = "market";
+
+    pub fn get_account_size(title: &String, discriminator: &String) -> usize {
+        return (4 + discriminator.len()) + 1 + 32 + 8 + (4 + title.len()) + 2 + 32;
+    }
 }
