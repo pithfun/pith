@@ -42,6 +42,6 @@ impl Market {
     pub const DISCRIMINATOR: &'static str = "market";
 
     pub fn get_account_size(title: &String, discriminator: &String) -> usize {
-        return (4 + discriminator.len()) + 1 + 32 + 8 + (4 + title.len()) + 2 + 32;
+        return (4 + discriminator.len()) + 32 + 8 + (4 + title.len()) + 2 + 32;
     }
 }
