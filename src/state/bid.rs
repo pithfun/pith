@@ -13,9 +13,11 @@ pub struct Bid {
     pub amount: u64,
     /// The account that placed this bid.
     pub authority: Pubkey,
+    /// The unique bid ID.
+    pub id: u64,
 }
 
 impl Bid {
     pub const DISCRIMINATOR: &'static str = "bid";
-    pub const SIZE: usize = (4 + Bid::DISCRIMINATOR.len()) + 32 + 8 + 32;
+    pub const SIZE: usize = (4 + Bid::DISCRIMINATOR.len()) + 32 + 8 + 32 + 8;
 }

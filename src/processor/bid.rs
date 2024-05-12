@@ -1,7 +1,13 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
-    account_info::AccountInfo, borsh1::try_from_slice_unchecked, entrypoint::ProgramResult, msg,
-    program_error::ProgramError, pubkey::Pubkey, system_program,
+    account_info::AccountInfo,
+    borsh1::try_from_slice_unchecked,
+    entrypoint::ProgramResult,
+    program::invoke,
+    program_error::ProgramError,
+    pubkey::Pubkey,
+    system_instruction::{self},
+    system_program,
 };
 
 use crate::{
@@ -22,11 +28,24 @@ pub fn process_bid<'a, 'info>(
     let args = BidArgs::try_from_slice(data)?;
 
     // Load account data
-    let [signer, market_info, bid_info, system_program] = accounts else {
+    #[rustfmt::skip]
+    let [
+        signer,
+        market_info,
+        escrow_info,
+        bid_info,
+        system_program
+    ] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
     let mut market_data = try_from_slice_unchecked::<Market>(&market_info.data.borrow())?;
+
+    // Transfer bid amount to escrow.
+    invoke(
+        &system_instruction::transfer(signer.key, escrow_info.key, args.amount),
+        &[signer.clone(), escrow_info.clone()],
+    )?;
 
     load_signer(signer)?;
     load_uninitialized_pda(
@@ -42,7 +61,7 @@ pub fn process_bid<'a, 'info>(
     )?;
     load_program(system_program, system_program::id())?;
 
-    // create bid Program Derived Address.
+    // create bid account.
     create_pda(
         bid_info,
         &crate::id(),
@@ -58,12 +77,13 @@ pub fn process_bid<'a, 'info>(
         signer,
     )?;
 
-    let mut bid_data = try_from_slice_unchecked::<Bid>(&bid_info.data.borrow()).unwrap();
+    let mut bid_data = try_from_slice_unchecked::<Bid>(&bid_info.data.borrow())?;
 
     bid_data.discriminator = Bid::DISCRIMINATOR.to_string();
     bid_data.market = *market_info.key;
     bid_data.amount = args.amount;
     bid_data.authority = *signer.key;
+    bid_data.id = args.id;
     bid_data.serialize(&mut &mut bid_info.data.borrow_mut()[..])?;
 
     market_data.counter += 1;

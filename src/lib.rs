@@ -33,7 +33,7 @@ pub fn process_instruction(
         .ok_or(ProgramError::InvalidInstructionData)?;
 
     match PithInstruction::try_from(*tag).or(Err(ProgramError::InvalidInstructionData))? {
-        PithInstruction::Market => process_market(program_id, accounts, data)?,
+        PithInstruction::Market => process_init_market(program_id, accounts, data)?,
         PithInstruction::Bid => process_bid(program_id, accounts, data)?,
     }
 
