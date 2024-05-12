@@ -3,11 +3,17 @@ use solana_program::{
     program_error::ProgramError, pubkey::Pubkey, system_program,
 };
 
-use crate::{instruction::MarketArgs, loaders::*, state::Market, utils::*, MARKET};
+use crate::{
+    instruction::MarketArgs,
+    loaders::*,
+    state::{Escrow, Market},
+    utils::*,
+    ESCROW, MARKET,
+};
 use borsh::{BorshDeserialize, BorshSerialize};
 
-// process_market creates a new tradable market.
-pub fn process_market<'a, 'info>(
+// process_init_market creates a new tradable market.
+pub fn process_init_market<'a, 'info>(
     _program_id: &Pubkey,
     accounts: &'a [AccountInfo<'info>],
     data: &[u8],
@@ -16,7 +22,7 @@ pub fn process_market<'a, 'info>(
     let args = MarketArgs::try_from_slice(data)?;
 
     // Load account data
-    let [signer, market_info, system_program] = accounts else {
+    let [signer, market_info, escrow_info, system_program] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
@@ -27,9 +33,15 @@ pub fn process_market<'a, 'info>(
         args.bump,
         &crate::id(),
     )?;
+    load_uninitialized_pda(
+        escrow_info,
+        &[ESCROW, market_info.key.as_ref()],
+        args.escrow_bump,
+        &crate::id(),
+    )?;
     load_program(system_program, system_program::id())?;
 
-    // Create the market
+    // Create market account
     create_pda(
         market_info,
         &crate::id(),
@@ -44,9 +56,18 @@ pub fn process_market<'a, 'info>(
         signer,
     )?;
 
+    // Create escrow account
+    create_pda(
+        escrow_info,
+        &crate::id(),
+        Escrow::get_account_size(&Market::DISCRIMINATOR.to_string()),
+        &[ESCROW, market_info.key.as_ref(), &[args.escrow_bump]],
+        system_program,
+        signer,
+    )?;
+
     let mut market_data = try_from_slice_unchecked::<Market>(&market_info.data.borrow()).unwrap();
     market_data.discriminator = Market::DISCRIMINATOR.to_string();
-    market_data.bump = args.bump;
     market_data.authority = *signer.key;
     market_data.id = args.id;
     market_data.title = args.title;
